@@ -1,0 +1,40 @@
+{
+  "type": "panel",
+  "name": "grafana-heatmap-panel",
+  "id": "ismael-grafana-heatmap-panel",
+  "info": {
+    "description": "Heatmap panel plugin with options for per column variation",
+    "author": {
+      "name": "ismael",
+      "url": ""
+    },
+    "keywords": [
+      "heatmap",
+      "d3",
+      "panel",
+      "grafana",
+      "plugin"
+    ],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://github.com/grafana/simple-react-panel"
+      },
+      {
+        "name": "License",
+        "url": "https://github.com/grafana/simple-react-panel/blob/master/LICENSE"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaVersion": "7.0.x",
+    "plugins": []
+  }
+}
