@@ -1,7 +1,5 @@
-type SeriesSize = 'sm' | 'md' | 'lg';
+type ChangeDirection = 'bottomToTop' | 'topToBottom';
 
 export interface HeatmapOptions {
-  text: string;
-  showSeriesCount: boolean;
-  seriesCountSize: SeriesSize;
+  changeDirection: ChangeDirection;
 }
