@@ -10,15 +10,16 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
   // -----------------------    CHART CONSTANTS    -----------------------
   const CHART_REQUIRED_FIELDS = { pivot: 'pivot' };
   const PERCENTAGE_CHANGE_DIRECTION = { topToBottom: 'topToBottom', bottomToTop: 'bottomToTop' };
-  const COLOR_CELL_BY = { change: 0, heatmap: 1 }
-  const COLOR_OPTIONS_SIZE = Object.keys(COLOR_CELL_BY).length
+  const COLOR_CELL_BY = { change: 0, heatmap: 1 };
+  const COLOR_OPTIONS_SIZE = Object.keys(COLOR_CELL_BY).length;
 
   // -----------------------  CHART CONFIGURATION  -----------------------
   const config = {
-    background: 'white', // '#fffffc',
+    background: 'white',
     removeEmptyCols: true,
     changeDirection: options.changeDirection,
-    colorBy: COLOR_CELL_BY.change
+    colorBy: COLOR_CELL_BY.change,
+    toggleColor: options.toggleColor,
   };
 
   // The indices are drawn from top (index 0) to bottom (index dataLen - 1)
@@ -52,7 +53,7 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
   const categories = categoryFields.map(field => field.name);
 
   const pivotIndices = d3.range(dataLen);
-  const categoryExtent = d3.extent(categoryFields.flatMap(field => d3.extent(field.values.toArray())))
+  const categoryExtent = d3.extent(categoryFields.flatMap(field => d3.extent(field.values.toArray())));
 
   // -----------------------    CHART DIMENSIONS  -----------------------
   const dimensions = {
@@ -78,9 +79,10 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
   // COLOR BY COMPLETE VALUES - PROPER HEATMAP
   // clampling interpolater to avoid using lighter and stronger blues
   const clampColorRange = d3.interpolate(0, 0.7);
-  const colorAsHeatmap = d3.scaleSequential()
+  const colorAsHeatmap = d3
+    .scaleSequential()
     .domain(categoryExtent)
-    .interpolator(t => d3.interpolateBlues(clampColorRange(t)))
+    .interpolator(t => d3.interpolateBlues(clampColorRange(t)));
 
   // SCALES
   const x = d3
@@ -127,8 +129,8 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
   const getValues = ({ category, pivotIndex }) => {
     const referenceIndex = pivotIndex + config.referenceChange;
-    const currentValue = formatValue({category, pivotIndex});
-    const referenceValue = formatValue({category, pivotIndex: referenceIndex}) || 0;
+    const currentValue = formatValue({ category, pivotIndex });
+    const referenceValue = formatValue({ category, pivotIndex: referenceIndex }) || 0;
     const change = (currentValue - referenceValue) / referenceValue;
     return { currentValue, referenceValue, change };
   };
@@ -161,30 +163,35 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
             : referenceValue === 0
             ? colorByChange(0.5)
             : colorByChange(clampedChange);
-        }
+        };
 
         const colorHeatmap = d => {
           const { currentValue } = getValues(d);
-          return colorAsHeatmap(currentValue)
-        }
+          return colorAsHeatmap(currentValue);
+        };
 
         const getColor = d => {
           switch (config.colorBy) {
             case COLOR_CELL_BY.change:
-              return colorChange(d)
+              return colorChange(d);
             case COLOR_CELL_BY.heatmap:
-              return colorHeatmap(d)
+              return colorHeatmap(d);
             default:
               break;
           }
-        }
+        };
 
         const toggleColoring = _ => {
-          config.colorBy = (config.colorBy + 1) % COLOR_OPTIONS_SIZE
-          bounds.selectAll('.matrix-cell')
-            .transition().duration(500)
-            .attr('fill', d => getColor(d))
-        }
+          if (!config.toggleColor) {
+            return;
+          }
+          config.colorBy = (config.colorBy + 1) % COLOR_OPTIONS_SIZE;
+          bounds
+            .selectAll('.matrix-cell')
+            .transition()
+            .duration(500)
+            .attr('fill', getColor);
+        };
 
         // DRAWING
         const item = d3
@@ -199,6 +206,8 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
           .attr('class', 'matrix-cell')
           .attr('x', d => x(d.category))
           .attr('y', itemPositionY)
+          .attr('rx', 2)
+          .attr('ry', 2)
           .attr('width', x.bandwidth())
           .attr('height', y.bandwidth())
           .on('click', toggleColoring)
@@ -219,7 +228,7 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
               .append('tspan')
               .attr('x', d => x(d.category) + x.bandwidth() / 2)
               .attr('y', itemPositionY + y.bandwidth() / 2)
-              .each( (d, i, nodes) => {
+              .each((d, i, nodes) => {
                 const { currentValue, referenceValue } = getValues(d);
 
                 d3.select(nodes[i])
