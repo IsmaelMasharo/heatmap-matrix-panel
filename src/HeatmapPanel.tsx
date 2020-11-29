@@ -58,10 +58,10 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
   const dimensions = {
     width: width,
     height: height,
-    marginTop: 30,
-    marginRight: 40,
-    marginBottom: 20,
-    marginLeft: 50,
+    marginTop: 20,
+    marginRight: 30,
+    marginBottom: 10,
+    marginLeft: 40,
   };
 
   dimensions.boundedWidth = dimensions.width - dimensions.marginLeft - dimensions.marginRight;
@@ -77,7 +77,7 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
   // COLOR BY COMPLETE VALUES - PROPER HEATMAP
   // clampling interpolater to avoid using lighter and stronger blues
-  const clampColorRange = d3.interpolate(0.1, 0.7);
+  const clampColorRange = d3.interpolate(0, 0.7);
   const colorAsHeatmap = d3.scaleSequential()
     .domain(categoryExtent)
     .interpolator(t => d3.interpolateBlues(clampColorRange(t)))
@@ -181,7 +181,7 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
         const toggleColoring = _ => {
           config.colorBy = (config.colorBy + 1) % COLOR_OPTIONS_SIZE
-          d3.selectAll('.matrix-cell')
+          bounds.selectAll('.matrix-cell')
             .transition().duration(500)
             .attr('fill', d => getColor(d))
         }
