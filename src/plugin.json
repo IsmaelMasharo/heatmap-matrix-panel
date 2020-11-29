@@ -1,7 +1,7 @@
 {
   "type": "panel",
-  "name": "grafana-heatmap-panel",
-  "id": "ismael-grafana-heatmap-panel",
+  "name": "heatmap-matrix-panel",
+  "id": "ismael-heatmap-matrix-panel",
   "info": {
     "description": "Heatmap panel plugin with options for per column variation",
     "author": {
