@@ -5,7 +5,7 @@ import { PanelProps } from '@grafana/data';
 import { HeatmapOptions } from 'types';
 
 interface Props extends PanelProps<HeatmapOptions> {}
-
+// TODO: FIX WHEN REPEATED NAMES PRESENT PER COLUMNS OR ROWS
 export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) => {
   // -----------------------    CHART CONSTANTS    -----------------------
   const CHART_REQUIRED_FIELDS = { pivot: 'pivot' };
@@ -145,9 +145,10 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
     // MATRIX
     bounds
-      .selectAll('g')
+      .selectAll('.pivot-index-row')
       .data(pivotIndices)
       .join('g')
+      .attr('class', 'pivot-index-row')
       .each((pivotIndex, i, nodes) => {
         // CONSTANTS PER GROUP
         const itemPositionY = y(pivotAccesor.values.get(pivotIndex));
@@ -187,7 +188,7 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
           }
           config.colorBy = (config.colorBy + 1) % COLOR_OPTIONS_SIZE;
           bounds
-            .selectAll('.matrix-cell')
+            .selectAll('.matrix-cell>.cell-shape')
             .transition()
             .duration(500)
             .attr('fill', getColor);
@@ -196,14 +197,15 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
         // DRAWING
         const item = d3
           .select(nodes[i])
-          .selectAll('g')
+          .selectAll('.matrix-cell')
           .data(categories.map(category => ({ category, pivotIndex })))
-          .join('g');
+          .join('g')
+          .attr('class', 'matrix-cell');
 
         // CELLS
         item
           .append('rect')
-          .attr('class', 'matrix-cell')
+          .attr('class', 'cell-shape')
           .attr('x', d => x(d.category))
           .attr('y', itemPositionY)
           .attr('rx', 2)
@@ -218,11 +220,10 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
         // VALUES
         item
           .append('text')
+          .attr('class', 'cell-label')
           .attr('font-size', 10)
           .attr('pointer-events', 'none')
           .attr('text-anchor', 'middle')
-          // .attr('x', category => x(category) + x.bandwidth() / 2)
-          // .attr('y', itemPositionY + y.bandwidth() / 2)
           .call(text =>
             text
               .append('tspan')
