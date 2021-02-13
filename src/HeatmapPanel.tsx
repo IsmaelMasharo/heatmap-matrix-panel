@@ -15,12 +15,13 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
   // -----------------------  CHART CONFIGURATION  -----------------------
   const config = {
+    cellPadding: 0.16,
     background: '#f8f8fa',
     removeEmptyCols: true,
-    changeDirection: options.changeDirection,
     colorBy: COLOR_CELL_BY.change,
     toggleColor: options.toggleColor,
-    cellPadding: 0.16,
+    changeDirection: options.changeDirection,
+    changeDirectionSymbol: { topToBottom: '↡', bottomToTop: '↟', heatmap: '' }
   };
 
   // The indices are drawn from top (index 0) to bottom (index dataLen - 1)
@@ -137,6 +138,13 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
     return { currentValue, referenceValue, change };
   };
 
+  // CHANGE DIRECTION SYMBOL
+  const getSymbol = () => {
+    if (config.colorBy !== COLOR_CELL_BY.heatmap)
+      return config.changeDirectionSymbol[config.changeDirection]
+    return config.changeDirectionSymbol.heatmap
+  }
+
   // CHART
   const chart = svg => {
     // SVG STYLING
@@ -144,6 +152,25 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
     // BOUNDS
     const bounds = svg.append('g').attr('transform', `translate(${dimensions.marginLeft}, ${dimensions.marginTop})`);
+
+    // CHANGE DIRECTION SYMBOL
+    bounds
+      .append('rect')
+      .attr('x', -15)
+      .attr('y', -15)
+      .attr('width', 20)
+      .attr('height', 20)
+      .attr('fill', config.background)
+      .append('title')
+      .text('Change direction');
+
+    bounds
+      .append('text')
+        .attr('class', 'change-direction-symbol')
+        .attr('text-anchor', 'end')
+        .attr('font-weight', 'bold')
+        .attr('pointer-events', 'none')
+        .text(getSymbol)
 
     // MATRIX
     bounds
@@ -247,6 +274,10 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
           bounds
             .selectAll('.matrix-cell>.cell-label>.cell-label-percentage')
             .attr('visibility', decenteredTotals ? 'visible' : 'hidden');
+
+          bounds
+            .selectAll('.change-direction-symbol')
+            .text(getSymbol)
         };
 
         // DRAWING
