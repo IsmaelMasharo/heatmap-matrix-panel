@@ -15,11 +15,12 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
   // -----------------------  CHART CONFIGURATION  -----------------------
   const config = {
-    background: 'white',
+    background: '#f8f8fa',
     removeEmptyCols: true,
     changeDirection: options.changeDirection,
     colorBy: COLOR_CELL_BY.change,
     toggleColor: options.toggleColor,
+    cellPadding: 0.16,
   };
 
   // The indices are drawn from top (index 0) to bottom (index dataLen - 1)
@@ -89,13 +90,13 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
     .scaleBand()
     .domain(categories)
     .range([0, dimensions.boundedWidth])
-    .padding(0.2);
+    .padding(config.cellPadding);
 
   const y = d3
     .scaleBand()
     .domain(pivots)
     .range([0, dimensions.boundedHeight])
-    .padding(0.2);
+    .padding(config.cellPadding);
 
   // AXIS
   const xAxis = g =>
@@ -108,7 +109,7 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
       )
       .call(g => g.select('.domain').remove())
       .selectAll('text')
-      .attr('dy', '.5em')
+      .attr('dy', '.2em')
       .style('text-anchor', 'midle');
 
   const yAxis = g =>
@@ -121,7 +122,8 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
       )
       .call(g => g.select('.domain').remove())
       .selectAll('text')
-      .attr('x', 5);
+      .style('text-anchor', 'end')
+      .attr('x', 2);
 
   // VALUE FORMATING
   const formatValue = ({ category, pivotIndex }) =>
