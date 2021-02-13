@@ -8,7 +8,7 @@ interface Props extends PanelProps<HeatmapOptions> {}
 // TODO: FIX WHEN REPEATED NAMES PRESENT PER COLUMNS OR ROWS
 export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) => {
   // -----------------------    CHART CONSTANTS    -----------------------
-  const CHART_REQUIRED_FIELDS = { pivot: 'pivot' };
+  const CHART_REQUIRED_FIELDS = { pivot: 'idx' };
   const PERCENTAGE_CHANGE_DIRECTION = { topToBottom: 'topToBottom', bottomToTop: 'bottomToTop' };
   const COLOR_CELL_BY = { change: 0, heatmap: 1 };
   const COLOR_OPTIONS_SIZE = Object.keys(COLOR_CELL_BY).length;
@@ -47,7 +47,7 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
   // -----------------------      VALIDATIONS     -----------------------
   if (!pivotAccesor) {
-    throw new Error(`Required fields not present: ${Object.keys(CHART_REQUIRED_FIELDS).join(', ')}`);
+    throw new Error(`Required fields not present: ${Object.values(CHART_REQUIRED_FIELDS).join(', ')}`);
   }
 
   // -----------------------  CHART FIELD VALUES  -----------------------
