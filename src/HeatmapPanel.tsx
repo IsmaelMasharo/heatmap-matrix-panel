@@ -10,7 +10,7 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
   // -----------------------    CHART CONSTANTS    -----------------------
   const CHART_REQUIRED_FIELDS = { pivot: 'idx' };
   const PERCENTAGE_CHANGE_DIRECTION = { topToBottom: 'topToBottom', bottomToTop: 'bottomToTop' };
-  const COLOR_CELL_BY = { change: 0, heatmap: 1 };
+  const COLOR_CELL_BY = { rowChangePerColumn: 0, heatmap: 1 };
   const COLOR_OPTIONS_SIZE = Object.keys(COLOR_CELL_BY).length;
 
   // -----------------------  CHART CONFIGURATION  -----------------------
@@ -18,10 +18,10 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
     cellPadding: 0.16,
     background: '#f8f8fa',
     removeEmptyCols: true,
-    colorBy: COLOR_CELL_BY.change,
+    colorBy: COLOR_CELL_BY[options.colorCellBy],
     toggleColor: options.toggleColor,
     changeDirection: options.changeDirection,
-    changeDirectionSymbol: { topToBottom: '↡', bottomToTop: '↟', heatmap: '' }
+    changeDirectionSymbol: { topToBottom: '↡', bottomToTop: '↟', heatmap: '' },
   };
 
   // The indices are drawn from top (index 0) to bottom (index dataLen - 1)
@@ -140,10 +140,11 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
   // CHANGE DIRECTION SYMBOL
   const getSymbol = () => {
-    if (config.colorBy !== COLOR_CELL_BY.heatmap)
-      return config.changeDirectionSymbol[config.changeDirection]
-    return config.changeDirectionSymbol.heatmap
-  }
+    if (config.colorBy !== COLOR_CELL_BY.heatmap) {
+      return config.changeDirectionSymbol[config.changeDirection];
+    }
+    return config.changeDirectionSymbol.heatmap;
+  };
 
   // CHART
   const chart = svg => {
@@ -166,11 +167,11 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
     bounds
       .append('text')
-        .attr('class', 'change-direction-symbol')
-        .attr('text-anchor', 'end')
-        .attr('font-weight', 'bold')
-        .attr('pointer-events', 'none')
-        .text(getSymbol)
+      .attr('class', 'change-direction-symbol')
+      .attr('text-anchor', 'end')
+      .attr('font-weight', 'bold')
+      .attr('pointer-events', 'none')
+      .text(getSymbol);
 
     // MATRIX
     bounds
@@ -183,7 +184,8 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
         const itemPositionY = y(pivotAccesor.values.get(pivotIndex));
 
         // DISPLAY VALUES HELPERS
-        const decenteredTotals = (curr, ref) => curr && ref && config.colorBy !== COLOR_CELL_BY.heatmap;
+        const percentVisible = () => config.colorBy !== COLOR_CELL_BY.heatmap;
+        const decenteredTotals = (curr, ref) => curr && ref && percentVisible();
 
         const displayTotals = text =>
           text
@@ -209,14 +211,14 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
             .attr('y', itemPositionY + y.bandwidth() / 2)
             .attr('class', 'cell-label-percentage')
             .each((d, i, nodes) => {
-              const { currentValue, referenceValue, change } = getValues(d);
-              const notCenteredTotals = decenteredTotals(currentValue, referenceValue);
+              const { change } = getValues(d);
 
-              if (notCenteredTotals) {
+              if (isFinite(change)) {
                 // display percentage change bellow totals
                 d3.select(nodes[i])
                   .attr('dy', '1em')
-                  .text(d3.format('.1%')(change));
+                  .text(d3.format('.1%')(change))
+                  .attr('visibility', percentVisible() ? 'visible' : 'hidden');
               }
             });
 
@@ -240,7 +242,7 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
         const getColor = d => {
           switch (config.colorBy) {
-            case COLOR_CELL_BY.change:
+            case COLOR_CELL_BY.rowChangePerColumn:
               return colorChange(d);
             case COLOR_CELL_BY.heatmap:
               return colorHeatmap(d);
@@ -255,7 +257,6 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
             return;
           }
           config.colorBy = (config.colorBy + 1) % COLOR_OPTIONS_SIZE;
-          const decenteredTotals = config.colorBy !== COLOR_CELL_BY.heatmap;
 
           // this will only work for the current row
           // item.selectAll('.cell-shape')
@@ -268,16 +269,14 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
 
           bounds.selectAll('.matrix-cell>.cell-label>.cell-label-total').each(function() {
             const percenValue = this.nextSibling.textContent;
-            d3.select(this).attr('dy', decenteredTotals && percenValue ? '-0.4em' : '.35em');
+            d3.select(this).attr('dy', percentVisible() && percenValue ? '-0.4em' : '.35em');
           });
 
           bounds
             .selectAll('.matrix-cell>.cell-label>.cell-label-percentage')
-            .attr('visibility', decenteredTotals ? 'visible' : 'hidden');
+            .attr('visibility', percentVisible() ? 'visible' : 'hidden');
 
-          bounds
-            .selectAll('.change-direction-symbol')
-            .text(getSymbol)
+          bounds.selectAll('.change-direction-symbol').text(getSymbol);
         };
 
         // DRAWING
