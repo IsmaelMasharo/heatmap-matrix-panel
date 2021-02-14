@@ -57,3 +57,7 @@ In both cases, a symbol indicator is visible at the top-left side of the panel i
 ### Toggle Color on Click
 
 Boolean. If true toggles color between the two coloring options. Default false.
+
+## TODO
+
+Error handling. In the meantime, on errors use the default Table visualization to double check values.
