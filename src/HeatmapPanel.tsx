@@ -211,9 +211,9 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
             .attr('y', itemPositionY + y.bandwidth() / 2)
             .attr('class', 'cell-label-percentage')
             .each((d, i, nodes) => {
-              const { change } = getValues(d);
+              const { currentValue, change } = getValues(d);
 
-              if (isFinite(change)) {
+              if (currentValue && isFinite(change)) {
                 // display percentage change bellow totals
                 d3.select(nodes[i])
                   .attr('dy', '1em')
