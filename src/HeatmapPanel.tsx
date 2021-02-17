@@ -21,7 +21,7 @@ export const HeatmapPanel: React.FC<Props> = ({ options, data, width, height }) 
     colorBy: COLOR_CELL_BY[options.colorCellBy],
     toggleColor: options.toggleColor,
     changeDirection: options.changeDirection,
-    changeDirectionSymbol: { topToBottom: '↡', bottomToTop: '↟', heatmap: '' },
+    changeDirectionSymbol: { topToBottom: '↓', bottomToTop: '↑', heatmap: '' },
   };
 
   // The indices are drawn from top (index 0) to bottom (index dataLen - 1)
